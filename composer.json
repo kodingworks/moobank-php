@@ -1,0 +1,26 @@
+{
+    "name": "moobank/moobank",
+    "description": "Bank library interface",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Moobank\\": "./src"
+        }
+    },
+    "require": {
+        "psr/http-message": "^1.0",
+        "psr/http-client": "^1.0",
+        "guzzlehttp/guzzle": "^7.1",
+        "symfony/http-foundation": "^5.1",
+        "composer require symfony/psr-http-message-bridge": "^2.0.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    },
+    "authors": [
+        {
+            "name": "Mohamad Rafi",
+            "email": "rafi.randoni@gmail.com"
+        }
+    ]
+}
