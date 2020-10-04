@@ -16,18 +16,17 @@ abstract class AbstractRequest
 
     protected $response;
 
+    protected $endpoint = null;
+
+    protected $method = 'POST';
+
     public function __construct(ClientInterface $httpClient, RequestInterface $httpRequest)
     {
         $this->httpClient = $httpClient;
         $this->httpRequest = $httpRequest;
-    }
 
-    public function getMethod()
-    {
-        return 'GET';
+        $this->initialize();
     }
-
-    public function getEndpoint();
 
     public function initialize(array $parameters = [])
     {
@@ -39,6 +38,32 @@ abstract class AbstractRequest
         }
     }
 
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
+    public function getEndpoint()
+    {
+        return $this->endpoint;
+    }
+
+    public function getHeaders()
+    {
+        return [
+            'Cache-Control' => 'no-cache',
+        ];
+    }
+
+    public function getOptions()
+    {
+        return [
+            'headers' => $this->getHeaders(),
+            'verify' => false,
+            'timeout' => 30
+        ];
+    }
+
     public function getData()
     {
         $data = [];
@@ -46,9 +71,11 @@ abstract class AbstractRequest
         return $data;
     }
 
-    abstract function sendData($data)
+    public function sendData($data)
     {
-        $httpResponse = $this->httpClient->request($this->getMethod(), $this->getEndpoint(), []);
+        try {
+            $httpResponse = $this->httpClient->request($this->getMethod(), $this->getEndpoint(), $this->getOptions());
+        } catch (\Exception $e) {}
     }
 
     public function send()
