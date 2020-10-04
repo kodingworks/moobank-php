@@ -4,6 +4,10 @@ use GuzzleHttp\Client;
 use Moobank\AbstractGateway;
 use PHPUnit\Framework\TestCase;
 
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriInterface;
+use Psr\Http\Message\StreamInterface;
+
 class GatewayTest extends TestCase
 {
     public function setUp(): void
@@ -32,24 +36,28 @@ class GatewayTest extends TestCase
         // $psr7Factory = new Diactoros
 
         $moobank = new \Moobank\Moobank;
-        $concrete = $moobank->create(new ConcreteClass, new \GuzzleHttp\Client, $request);
+        $concrete = $moobank->create(ConcreteClass::class, new \GuzzleHttp\Client, $request);
 
         $this->assertEquals('Concrete Class', $concrete->getName());
     }
 
     public function testGetParameters()
     {
-        $moobank = new \Moobank\Moobank;
-        $moobank->setParameter('test', 123);
+        $request = new Request;
 
-        var_dump($moobank->getParameters());
-        exit;
+        $moobank = new \Moobank\Moobank;
+        $concrete = $moobank->create(ConcreteClass::class, new \GuzzleHttp\Client, $request);
+
+        $concrete->setParameter('test', 123);
+        $this->assertEquals($concrete->getParameter('test'), 123);
     }
 }
 
 // Concrete class to test gateway
 class ConcreteClass extends AbstractGateway
 {
+    protected $parameters = [];
+
     public function __construct()
     {
         //
@@ -70,8 +78,40 @@ class ConcreteClass extends AbstractGateway
         return 'class.concrete';
     }
 
+    public function getParameter($key)
+    {
+        return $this->parameters[$key];
+    }
+
     public function getParameters()
     {
-        return ['id'];
+        return $this->parameters;
     }
+
+    public function setParameter($key, $val)
+    {
+        $this->parameters[$key] = $val;
+    }
+}
+
+class Request implements RequestInterface
+{
+    public function getRequestTarget() {}
+    public function withRequestTarget($requestTarget) {}
+    public function getMethod() {}
+    public function withMethod($method) {}
+    public function getUri() {}
+    public function withUri(UriInterface $uri, $preserveHost = false) {}
+
+    public function getProtocolVersion() {}
+    public function withProtocolVersion($version) {}
+    public function getHeaders() {}
+    public function hasHeader($name) {}
+    public function getHeader($name) {}
+    public function getHeaderLine($name) {}
+    public function withHeader($name, $value) {}
+    public function withAddedHeader($name, $value) {}
+    public function withoutHeader($name) {}
+    public function getBody() {}
+    public function withBody(StreamInterface $body) {}
 }
