@@ -2,7 +2,7 @@
 
 namespace Moobank\Exception;
 
-class ClassNotFoundExcetion extends \Exception implements MoobankException
+class ClassNotFoundException extends \Exception implements MoobankException
 {
     protected $message = 'Class Not Found';
 }
