@@ -13,13 +13,15 @@ abstract class AbstractGateway implements GatewayInterface
     protected $httpRequest;
     protected $parameters;
 
-    public function __construct(ClientInterface $httpClient = null, RequestInterface $httpRequest)
+    public function __construct(ClientInterface $httpClient = null, RequestInterface $httpRequest = null)
     {
         $this->httpClient = $httpClient ?: $this->getDefaultHttpClient();
         $this->httpRequest = $httpRequest ?: $this->getDefaultHttpRequest();
 
         $this->initialize();
     }
+
+    abstract public function __get($property);
 
     public function getDefaultHttpClient() {
         return new Client();
@@ -37,6 +39,11 @@ abstract class AbstractGateway implements GatewayInterface
     public function getDefaultParameters(): Array
     {
         return [];
+    }
+
+    public function getParameters()
+    {
+        return $this->parameters->all();
     }
 
     public function getParameter($key)
@@ -72,7 +79,11 @@ abstract class AbstractGateway implements GatewayInterface
 
     public function createRequest($class, array $parameters = null)
     {
+        if (is_null($parameters)) {
+            $parameters = $this->parameters->all();
+        }
+
         $class = new $class($this->httpClient, $this->httpRequest);
-        return $class->initialize();
+        return $class->initialize($parameters);
     }
 }
