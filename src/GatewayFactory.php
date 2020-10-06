@@ -33,10 +33,10 @@ class GatewayFactory
         return $this->gateways;
     }
 
-    public function create(string $class, ClientInterface $httpClient, RequestInterface $request)
+    public function create(string $class, ClientInterface $httpClient = null, RequestInterface $request = null)
     {
         if (! class_exists($class)) {
-            throw new \Moobank\Exception\ClassNotFoundExcetion;
+            throw new \Moobank\Exception\ClassNotFoundException;
         }
 
         $className = (new \ReflectionClass($class))->name;
