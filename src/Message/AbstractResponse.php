@@ -1,21 +1,25 @@
 <?php
 
-namespace Moobank\Nessage;
+namespace Moobank\Message;
 
-abstract class AbstractResponse
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\StreamInterface;
+
+abstract class AbstractResponse implements ResponseInterface
 {
     protected $request;
 
     protected $data;
 
-    public function __construct()
+    public function __construct(RequestInterface $request, $data)
     {
-        # code...
+        $this->request = $request;
+        $this->data = $data;
     }
 
-    public function gteRequest()
+    public function getRequest()
     {
-        # code...
+        return $this->request;
     }
 
     public function getData()
@@ -32,4 +36,75 @@ abstract class AbstractResponse
     {
         # code...
     }
+
+    public function getStatusCode()
+    {
+        //
+    }
+
+    public function withStatus($code, $reasonPhrase = '')
+    {
+        //
+    }
+
+    public function getReasonPhrase()
+    {
+        //
+    }
+
+    public function getProtocolVersion()
+    {
+        //
+    }
+
+    public function withProtocolVersion($version)
+    {
+        //
+    }
+
+    public function getHeaders()
+    {
+        //
+    }
+
+    public function hasHeader($name)
+    {
+        //
+    }
+
+    public function getHeader($name)
+    {
+        //
+    }
+
+    public function getHeaderLine($name)
+    {
+        //
+    }
+
+    public function withHeader($name, $value)
+    {
+        //
+    }
+
+    public function withAddedHeader($name, $value)
+    {
+        //
+    }
+
+    public function withoutHeader($name)
+    {
+        //
+    }
+
+    public function getBody()
+    {
+        //
+    }
+
+    public function withBody(StreamInterface $body)
+    {
+        parent::withBody($body);
+    }
+
 }
