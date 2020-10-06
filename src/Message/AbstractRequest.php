@@ -3,10 +3,14 @@
 namespace Moobank\Message;
 
 use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestInterface;
+use Moobank\Message\RequestInterface;
+use Moobank\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\Response;
+use Psr\Http\Message\UriInterface;
 
-abstract class AbstractRequest
+abstract class AbstractRequest implements RequestInterface
 {
     protected $httpClient;
 
@@ -20,7 +24,7 @@ abstract class AbstractRequest
 
     protected $method = 'POST';
 
-    public function __construct(ClientInterface $httpClient, RequestInterface $httpRequest)
+    public function __construct(ClientInterface $httpClient = null, RequestInterface $httpRequest = null)
     {
         $this->httpClient = $httpClient;
         $this->httpRequest = $httpRequest;
@@ -28,7 +32,7 @@ abstract class AbstractRequest
         $this->initialize();
     }
 
-    public function initialize(array $parameters = [])
+    public function initialize(array $parameters = null)
     {
         $this->parameters = new ParameterBag();
         if (! empty($parameters)) {
@@ -36,6 +40,8 @@ abstract class AbstractRequest
                 $this->parameters->set($key, $value);
             }
         }
+
+        return $this;
     }
 
     public function getMethod()
@@ -45,7 +51,22 @@ abstract class AbstractRequest
 
     public function getEndpoint()
     {
+        if ($mode = $this->parameters->get('mode', 'sandbox')) {
+            if ($modeEndpoint = $this->getModeEndpoint($mode)) {
+                return $modeEndpoint;
+            }
+        }
+
         return $this->endpoint;
+    }
+
+    public function getModeEndpoint($mode)
+    {
+        if (property_exists($this, $mode.'Endpoint')) {
+            return $this->{$mode.'Endpoint'};
+        }
+
+        return false;
     }
 
     public function getHeaders()
@@ -60,7 +81,8 @@ abstract class AbstractRequest
         return [
             'headers' => $this->getHeaders(),
             'verify' => false,
-            'timeout' => 30
+            'timeout' => 30,
+a            'debug' => $this->parameters->get('debug', false)
         ];
     }
 
@@ -73,9 +95,24 @@ abstract class AbstractRequest
 
     public function sendData($data)
     {
+        $options = $this->getOptions();
+        $options['form_params'] = $data;
+
         try {
-            $httpResponse = $this->httpClient->request($this->getMethod(), $this->getEndpoint(), $this->getOptions());
-        } catch (\Exception $e) {}
+            $httpResponse = $this->httpClient->request($this->getMethod(), $this->getEndpoint(), $options);
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+
+        $response = $httpResponse->getBody()->getContents();
+
+        if ($temp = json_decode($response)) {
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $response = $temp;
+            }
+        }
+
+        return $this->createResponse($response);
     }
 
     public function send()
@@ -84,4 +121,47 @@ abstract class AbstractRequest
 
         return $this->sendData($data);
     }
+
+    abstract public function createResponse($response);
+
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
+    public function getRequestTarget()
+    {
+        //
+    }
+
+    public function withRequestTarget($requestTarget)
+    {
+        //
+    }
+
+    public function withMethod($method)
+    {
+        //
+    }
+
+    public function getUri()
+    {
+        //
+    }
+
+    public function withUri(UriInterface $uri, $preserveHost = false)
+    {
+        //
+    }
+
+    public function getProtocolVersion() {}
+    public function withProtocolVersion($version) {}
+    public function hasHeader($name) {}
+    public function getHeader($name) {}
+    public function getHeaderLine($name) {}
+    public function withHeader($name, $value) {}
+    public function withAddedHeader($name, $value) {}
+    public function withoutHeader($name) {}
+    public function getBody() {}
+    public function withBody(StreamInterface $body) {}
 }
