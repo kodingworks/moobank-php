@@ -82,7 +82,7 @@ abstract class AbstractRequest implements RequestInterface
             'headers' => $this->getHeaders(),
             'verify' => false,
             'timeout' => 30,
-a            'debug' => $this->parameters->get('debug', false)
+            'debug' => $this->parameters->get('debug', false)
         ];
     }
 
@@ -96,7 +96,7 @@ a            'debug' => $this->parameters->get('debug', false)
     public function sendData($data)
     {
         $options = $this->getOptions();
-        $options['form_params'] = $data;
+        $options['json'] = $data;
 
         try {
             $httpResponse = $this->httpClient->request($this->getMethod(), $this->getEndpoint(), $options);
