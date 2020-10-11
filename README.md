@@ -1,3 +1,4 @@
+
 # Moobank
 
 **Core component for the moobank payment library**
@@ -155,8 +156,8 @@ class Factory extends AbstractGateway
 
 **Description:**
 
-| - | - |
 | Method | Default Params | Description |
+| - | - | - |
 | __get | $property | We use magic method on banking factory, to route every request to another (banking, payment, etc) factory, in this code, we place the other factory on root src folder |
 | getName | - | Return the plugin's name  |
 | getModuleName | - | Return the plugin module's name, it must unique from other plugin  |
@@ -201,3 +202,13 @@ class Banking extends AbstractGateway
 }
 
 ```
+
+**Description:**
+
+| Method | Default Params | Description |
+| - | - | - |
+| __get | $property | We use magic method on banking factory, to route every request to another (banking, payment, etc) factory, in this code, we place the other factory on root src folder |
+| getName | - | Return the plugin's name  |
+| getModuleName | - | Return the plugin module's name, it must unique from other plugin  |
+| inquiry | $parameters | Inquiry transactions from accounts |
+| balance | $parameters | Get current balance from accounts |
