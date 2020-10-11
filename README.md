@@ -80,8 +80,124 @@ Here are the basic concept you must know if you wanted to create your own paymen
 
 Like its name, this is the gateway for the all plugin that use moobank, it is a factory that produce plugin
 
+All child factory must extends from AbstractGateway
+
 #### Request
 
+Request handle data that sent to api, we prepare and manipulate data in here
 
+All child request object must extends from AbstractRequest
 
 #### Response
+
+Response hold response data from api
+
+All child response object must extends from AbstractResponse
+
+### Creating plugin
+
+#### Rules
+
+- Plugin namespace should start with Moobank\
+
+#### Creating Factory
+
+Factory is main class from plugin, we set access token and any default api requirement in here
+
+##### Creating Base Factory
+
+Here is base class that should exists in every factory object
+
+```php
+
+namespace Moobank\MandiriApi;
+
+use Moobank\AbstractGateway;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestInterface;
+
+class Factory extends AbstractGateway
+{
+    protected $accessToken;
+
+    public function __construct(ClientInterface $httpClient = null, RequestInterface $httpRequest = null)
+    {
+        parent::__construct($httpClient, $httpRequest);
+    }
+
+    public function __get($property)
+    {
+        $className = sprintf('%1s\%2s', 'Moobank\MandiriApi', ucfirst(strtolower($property)));
+        if (class_exists($className)) {
+
+            $class  = new $className($this->httpClient, $this->httpRequest);
+            $class->initialize($this->parameters->all());
+            $class->setParameter('accessToken', $this->getToken());
+
+            return $class;
+        }
+
+        throw new \Moobank\Exception\ClassNotFoundException;
+    }
+
+    public function getName()
+    {
+        return 'Mandiri Official API';
+    }
+
+    public function getModuleName()
+    {
+        return 'moobank.api.official.mandiri';
+    }
+}
+
+```
+
+**Description:**
+
+| - | - |
+| Method | Default Params | Description |
+| __get | $property | We use magic method on banking factory, to route every request to another (banking, payment, etc) factory, in this code, we place the other factory on root src folder |
+| getName | - | Return the plugin's name  |
+| getModuleName | - | Return the plugin module's name, it must unique from other plugin  |
+
+##### Creating Banking Factory
+
+```php
+
+namespace Moobank\MandiriApi;
+
+use Moobank\AbstractGateway;
+use Psr\Http\Client\ClientInterface;
+use Moobank\Message\RequestInterface;
+
+class Banking extends AbstractGateway
+{
+    public function __construct(ClientInterface $httpClient = null, RequestInterface $httpRequest = null)
+    {
+        $this->httpClient = $httpClient;
+        $this->httpRequest = $httpRequest;
+    }
+
+    public function getName()
+    {
+        return 'Mandiri Official API - Banking Service';
+    }
+
+    public function getModuleName()
+    {
+        return 'service.api.official.mandiri';
+    }
+
+    public function inquiry(array $parameters = [])
+    {
+        //
+    }
+
+    public function balance(array $parameters = [])
+    {
+        //
+    }
+}
+
+```
