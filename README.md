@@ -24,7 +24,7 @@ Put this on your composer.json
     "repositories": [
         {
             "type": "git",
-            "url": "https://gitlab.com/koding-works/moobank/moobank-mandiri-official-api.git"
+            "url": "https://gitlab.com/koding-works/moobank/moobank.git"
         }
     ],
     ...
