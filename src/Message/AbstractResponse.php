@@ -22,6 +22,11 @@ abstract class AbstractResponse implements ResponseInterface
         return $this->request;
     }
 
+    public function getRaw()
+    {
+        return $this->data;
+    }
+
     public function getData()
     {
         return $this->data;
