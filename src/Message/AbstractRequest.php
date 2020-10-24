@@ -96,7 +96,14 @@ abstract class AbstractRequest implements RequestInterface
     public function sendData($data)
     {
         $options = $this->getOptions();
+
         $options['json'] = $data;
+        try {
+            if (in_array(array_keys($data)[0], ['form_params', 'json', 'body', 'multipart'])) {
+                unset($options['json']);
+                $options = array_merge($options, $data);
+            }
+        } catch (\Exception $e) {}
 
         try {
             $httpResponse = $this->httpClient->request($this->getMethod(), $this->getEndpoint(), $options);
