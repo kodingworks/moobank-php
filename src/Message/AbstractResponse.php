@@ -109,7 +109,7 @@ abstract class AbstractResponse implements ResponseInterface
 
     public function withBody(StreamInterface $body)
     {
-        parent::withBody($body);
+        //parent::withBody($body);
     }
 
 }
