@@ -24,6 +24,8 @@ abstract class AbstractRequest implements RequestInterface
 
     protected $method = 'POST';
 
+    protected $callbacks = [];
+
     public function __construct(ClientInterface $httpClient = null, RequestInterface $httpRequest = null)
     {
         $this->httpClient = $httpClient;
@@ -69,6 +71,12 @@ abstract class AbstractRequest implements RequestInterface
         return false;
     }
 
+    public function then($callback)
+    {
+        $this->callbacks[] = $callback;
+        return $this;
+    }
+
     public function getHeaders()
     {
         return [
@@ -97,13 +105,15 @@ abstract class AbstractRequest implements RequestInterface
     {
         $options = $this->getOptions();
 
-        $options['json'] = $data;
-        try {
-            if (in_array(array_keys($data)[0], ['form_params', 'json', 'body', 'multipart'])) {
-                unset($options['json']);
-                $options = array_merge($options, $data);
-            }
-        } catch (\Exception $e) {}
+        if ($data) {
+            $options['json'] = $data;
+            try {
+                if (in_array(array_keys($data)[0], ['form_params', 'json', 'body', 'multipart'])) {
+                    unset($options['json']);
+                    $options = array_merge($options, $data);
+                }
+            } catch (\Exception $e) {}
+        }
 
         try {
             $httpResponse = $this->httpClient->request($this->getMethod(), $this->getEndpoint(), $options);
@@ -119,7 +129,11 @@ abstract class AbstractRequest implements RequestInterface
             }
         }
 
-        return $this->createResponse($response);
+        $responseBuilder = $this->createResponse($response);
+
+        $this->runCallback($this->callbacks);
+
+        return $responseBuilder;
     }
 
     public function send()
@@ -127,6 +141,13 @@ abstract class AbstractRequest implements RequestInterface
         $data = $this->getData();
 
         return $this->sendData($data);
+    }
+
+    public function runCallback(array $callbacks)
+    {
+        foreach ($callbacks as $key => $callback) {
+            $callback();
+        }
     }
 
     abstract public function createResponse($response);
