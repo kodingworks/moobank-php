@@ -10,4 +10,5 @@ class Statement extends AbstractEntities
     public $amount;
     public $description;
     public $hash;
+    public $balance;
 }
